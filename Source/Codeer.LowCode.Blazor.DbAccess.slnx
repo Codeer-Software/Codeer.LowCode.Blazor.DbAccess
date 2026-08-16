@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="Codeer.LowCode.Blazor.DbAccess.Test/Codeer.LowCode.Blazor.DbAccess.Test.csproj" />
+  <Project Path="Codeer.LowCode.Blazor.DbAccess/Codeer.LowCode.Blazor.DbAccess.csproj" />
+</Solution>
