@@ -428,5 +428,5 @@ FodyWeavers.xsd
 *.msm
 *.msp
 
-# テスト用の実DB接続文字列 (コミット禁止。書式は TestConnections.sample.json)
+# テスト用の実DB接続文字列 (コミット禁止)
 TestConnections.json

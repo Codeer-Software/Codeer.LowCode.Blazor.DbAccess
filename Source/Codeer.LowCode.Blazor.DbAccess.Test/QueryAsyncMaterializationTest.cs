@@ -25,7 +25,7 @@ namespace Test.DBLogic
         const string Ss = "Ss";
 
         // 実DBの接続文字列はテストプロジェクト直下の TestConnections.json (gitignore 対象) から取る。
-        // 公開リポジトリのため平文はコミットしない。書式は TestConnections.sample.json 参照。
+        // 公開リポジトリのため平文はコミットしない。書式: { "PostgreSQL": "...", "SQLServer": "...", "Oracle": "..." }
         // ファイルや項目が無い環境ではそのDBのテストは Ignore でスキップされる
         static string PgConn => RequireConnection("PostgreSQL");
         static string SsConn => RequireConnection("SQLServer");
