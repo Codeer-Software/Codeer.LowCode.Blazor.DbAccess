@@ -43,6 +43,10 @@ namespace Codeer.LowCode.Blazor.DbAccess
         //例: DbAccessor.SqlLog = Console.WriteLine;  ロガーへ流す場合: DbAccessor.SqlLog = s => logger.LogDebug(s);
         public static Action<string>? SqlLog { get; set; }
 
+        //この接続で実行する SQL 1 文のタイムアウト(秒)。0 (既定) ならドライバの既定。全ての Dapper 呼び出しに commandTimeout として渡す
+        public virtual int CommandTimeoutSeconds { get; set; }
+        int? CommandTimeout => CommandTimeoutSeconds > 0 ? CommandTimeoutSeconds : null;
+
         readonly Dictionary<string, ConnectionOwner> _connections = new();
         readonly Dictionary<string, DbTransaction> _transactions = new();
         readonly Dictionary<string, IDbContextTransaction> _dbContextTransactions = new();
@@ -186,7 +190,7 @@ namespace Codeer.LowCode.Blazor.DbAccess
         {
             var conn = GetConnection(dataSourceName);
             if (SqlLog != null) DumpSql("Execute", dataSourceName, query, args.Select(e => $"{e.Key} = {FormatSqlLogValue(e.Value)}"));
-            return await conn.ExecuteAsync(query, CreateParameter(args), GetTransaction(dataSourceName));
+            return await conn.ExecuteAsync(query, CreateParameter(args), GetTransaction(dataSourceName), commandTimeout: CommandTimeout);
         }
 
         public virtual async Task<string> InsertAsync(string dataSourceName, string query, Dictionary<string, object?> args)
@@ -194,7 +198,7 @@ namespace Codeer.LowCode.Blazor.DbAccess
             var conn = GetConnection(dataSourceName);
             var ps = CreateParameter(args);
             if (SqlLog != null) DumpSql("Insert", dataSourceName, query, args.Select(e => $"{e.Key} = {FormatSqlLogValue(e.Value)}"));
-            var ret = (await conn.ExecuteScalarAsync<string>(query, ps, GetTransaction(dataSourceName))) ?? string.Empty;
+            var ret = (await conn.ExecuteScalarAsync<string>(query, ps, GetTransaction(dataSourceName), commandTimeout: CommandTimeout)) ?? string.Empty;
             foreach (var e in args)
             {
                 args[e.Key] = ps.Get<object>(e.Key);
@@ -215,7 +219,7 @@ namespace Codeer.LowCode.Blazor.DbAccess
             //パラメータbindは従来どおりDapper(TypeHandler込み)、行のマテリアライズは全DB共通の自前実装。
             //Dapper dynamic(QueryAsync<object>)と同じGetValue読みだが、PostgreSQLのinterval列(月成分あり)だけ
             //型を明示して読む必要があるため(DB種別で経路を分けず)ここに一本化している
-            await using var reader = await conn.ExecuteReaderAsync(query, CreateParameter(args), GetTransaction(dataSourceName));
+            await using var reader = await conn.ExecuteReaderAsync(query, CreateParameter(args), GetTransaction(dataSourceName), commandTimeout: CommandTimeout);
             return await RawDbValueConverter.ReadRowsAsync(reader);
         }
 
@@ -261,7 +265,7 @@ namespace Codeer.LowCode.Blazor.DbAccess
             object? ret;
             if (command.MethodType == ExecuteSqlMethodType.Scalar)
             {
-                ret = await conn.ExecuteScalarAsync<object>(command.CommandText, ps, transaction, commandType: commandType);
+                ret = await conn.ExecuteScalarAsync<object>(command.CommandText, ps, transaction, commandTimeout: CommandTimeout, commandType: commandType);
             }
             else if (command.MethodType == ExecuteSqlMethodType.Reader)
             {
@@ -269,7 +273,7 @@ namespace Codeer.LowCode.Blazor.DbAccess
                 {
                     //コマンドを実行するだけで結果は読み捨てる(失敗時は例外)。Reader を開いたままにすると
                     //同一接続・同一トランザクションの後続コマンドがブロックされるため、スコープ内で確実に閉じる
-                    using var reader = await conn.ExecuteReaderAsync(command.CommandText, ps, transaction, commandType: commandType);
+                    using var reader = await conn.ExecuteReaderAsync(command.CommandText, ps, transaction, commandTimeout: CommandTimeout, commandType: commandType);
                 }
                 catch (Exception ex)
                 {
@@ -279,7 +283,7 @@ namespace Codeer.LowCode.Blazor.DbAccess
             }
             else
             {
-                ret = await conn.ExecuteAsync(command.CommandText, ps, transaction, commandType: commandType);
+                ret = await conn.ExecuteAsync(command.CommandText, ps, transaction, commandTimeout: CommandTimeout, commandType: commandType);
             }
 
             //実行後のパラメータ値(Output/InputOutput/ReturnValue の書き戻し用)。同名は先勝ち

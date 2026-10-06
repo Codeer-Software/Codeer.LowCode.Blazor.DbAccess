@@ -5,7 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Version>0.1.0</Version>
+    <Version>0.2.0</Version>
     <PackageId>Codeer.LowCode.Blazor.DbAccess</PackageId>
     <Title>Codeer.LowCode.Blazor.DbAccess</Title>
     <Company>Codeer</Company>
@@ -15,10 +15,7 @@
     <PackageTags>Blazor;LowCode;Codeer;Database</PackageTags>
     <Description>Multi-database access layer (SQL Server / PostgreSQL / Oracle / SQLite / MySQL) for Codeer.LowCode.Blazor server applications. Provides the standard IDbAccessor implementation (Dapper based, overridable). Note: the Oracle provider (Oracle.ManagedDataAccess.Core) is licensed under the Oracle Free Use Terms and Conditions.</Description>
     <PackageIcon>IconNuget.png</PackageIcon>
-    <PackageReleaseNotes>
-      - First release: extracted from the WebApp.Server.Shared template source as an independent package.
-      - SQL debug logging: assign DbAccessor.SqlLog to dump executed SQL and parameters.
-    </PackageReleaseNotes>
+    <PackageReleaseNotes>DbAccessor.CommandTimeoutSeconds: SQL command timeout applied to every command on the connection (0 = driver default). Requires Codeer.LowCode.Blazor 1.3.41.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
@@ -29,7 +26,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Codeer.LowCode.Blazor" Version="1.3.15" />
+    <PackageReference Include="Codeer.LowCode.Blazor" Version="1.3.41" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.0" />
     <PackageReference Include="Microsoft.Data.Sqlite" Version="8.0.8" />
     <PackageReference Include="MySqlConnector" Version="2.4.0" />
