@@ -64,14 +64,38 @@ namespace Codeer.LowCode.Blazor.DbAccess
         public virtual DataSource? GetDataSource(string dataSourceName)
             => _dataSources.FirstOrDefault(e => e.Name == dataSourceName);
 
+        /// <summary>
+        /// トランザクションを開始する。以降に開く接続だけでなく、すでに開いている接続 (通常の接続・DbContext の接続) にも
+        /// その場でトランザクションを張る (張っていない接続だけ)。
+        /// <see cref="CommitAsync"/> / RollbackAsync / <see cref="ClearAsync"/> (Dispose を含む) の後はトランザクションのモードを抜けるので、
+        /// 続けてトランザクションで実行するときは改めて呼ぶ。
+        /// </summary>
         public virtual void StartTransaction()
-            => _transactionMode = true;
+        {
+            _transactionMode = true;
+            foreach (var e in _connections)
+            {
+                if (_transactions.ContainsKey(e.Key) || _dbContextTransactions.ContainsKey(e.Key)) continue;
+                if (_dbContexts.TryGetValue(e.Key, out var dbContext))
+                {
+                    _dbContextTransactions[e.Key] = dbContext.Database.BeginTransaction();
+                }
+                else
+                {
+                    _transactions[e.Key] = e.Value.Connection.BeginTransaction();
+                }
+            }
+        }
 
         public virtual void StartDataAccess(string dataSourceName)
             => GetConnection(dataSourceName);
 
+        /// <summary>
+        /// 開いているトランザクションをすべてコミットする。接続は開いたまま。トランザクションのモードを抜ける (次の <see cref="StartTransaction"/> で張り直す)。
+        /// </summary>
         public virtual async Task CommitAsync()
         {
+            _transactionMode = false;
             foreach (var e in _transactions)
             {
                 await e.Value.CommitAsync();
@@ -88,8 +112,13 @@ namespace Codeer.LowCode.Blazor.DbAccess
 
         public virtual async ValueTask DisposeAsync() => await ClearAsync();
 
+        /// <summary>
+        /// 接続とトランザクションを破棄する (コミットしていないトランザクションはロールバックされる)。トランザクションのモードを抜ける。
+        /// IDbAccessor.RollbackAsync の既定実装はここに来る。
+        /// </summary>
         public virtual async ValueTask ClearAsync()
         {
+            _transactionMode = false;
             foreach (var e in _transactions) await e.Value.DisposeAsync();
             _transactions.Clear();
 
@@ -107,8 +136,12 @@ namespace Codeer.LowCode.Blazor.DbAccess
 
         public virtual void Dispose() => Clear();
 
+        /// <summary>
+        /// 接続とトランザクションを破棄する (コミットしていないトランザクションはロールバックされる)。トランザクションのモードを抜ける。
+        /// </summary>
         public virtual void Clear()
         {
+            _transactionMode = false;
             foreach (var e in _transactions) e.Value.Dispose();
             _transactions.Clear();
 
