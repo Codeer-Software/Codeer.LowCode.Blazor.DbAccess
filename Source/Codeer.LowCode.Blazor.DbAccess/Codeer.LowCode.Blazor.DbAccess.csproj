@@ -5,7 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Version>0.2.2</Version>
+    <Version>0.2.3</Version>
     <PackageId>Codeer.LowCode.Blazor.DbAccess</PackageId>
     <Title>Codeer.LowCode.Blazor.DbAccess</Title>
     <Company>Codeer</Company>
@@ -15,7 +15,7 @@
     <PackageTags>Blazor;LowCode;Codeer;Database</PackageTags>
     <Description>Multi-database access layer (SQL Server / PostgreSQL / Oracle / SQLite / MySQL) for Codeer.LowCode.Blazor server applications. Provides the standard IDbAccessor implementation (Dapper based, overridable). Note: the Oracle provider (Oracle.ManagedDataAccess.Core) is licensed under the Oracle Free Use Terms and Conditions.</Description>
     <PackageIcon>IconNuget.png</PackageIcon>
-    <PackageReleaseNotes>Updated MySqlConnector (2.6.2) and Entity Framework Core (8.0.33) to versions without known vulnerabilities.</PackageReleaseNotes>
+    <PackageReleaseNotes>Added DbErrors.IsUniqueViolation (classifies unique constraint violations across providers).</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
