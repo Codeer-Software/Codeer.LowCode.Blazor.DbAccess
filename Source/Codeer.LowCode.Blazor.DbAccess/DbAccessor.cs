@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage;
 using MySqlConnector;
 using Npgsql;
 using Oracle.ManagedDataAccess.Client;
+using System.Collections.Concurrent;
 using System.Data;
 using System.Data.Common;
 using System.Text;
@@ -34,9 +35,11 @@ namespace Codeer.LowCode.Blazor.DbAccess
             }
         }
 
-        static DbTableDefinitionCache _dbTableDefinitionCache = new();
-        public virtual DbTableDefinitionCache? DbTableDefinitionCache => _dbTableDefinitionCache;
-        public static void ClearTableDefinitionCache() => _dbTableDefinitionCache = new();
+        //表定義のキャッシュはテナントごと。テナント名を渡さないコンストラクタは string.Empty の 1 つを使う
+        static readonly ConcurrentDictionary<string, DbTableDefinitionCache> _dbTableDefinitionCaches = new();
+        public virtual DbTableDefinitionCache? DbTableDefinitionCache => _dbTableDefinitionCaches.GetOrAdd(_tenantName, _ => new());
+        public static void ClearTableDefinitionCache() => _dbTableDefinitionCaches.Clear();
+        public static void ClearTableDefinitionCache(string tenantName) => _dbTableDefinitionCaches.TryRemove(tenantName, out _);
 
         //SQLデバッグログ。設定すると実行するSQLとパラメータ(および出力パラメータの実行結果)をダンプする。
         //パッケージ参照ではソースにステップインできないため、その代替のデバッグ手段。null(既定)なら無効でオーバーヘッドなし。
@@ -52,8 +55,15 @@ namespace Codeer.LowCode.Blazor.DbAccess
         readonly Dictionary<string, IDbContextTransaction> _dbContextTransactions = new();
         readonly DataSource[] _dataSources;
         readonly Dictionary<string, DbContext> _dbContexts = new();
+        readonly string _tenantName = string.Empty;
 
         public DbAccessor(DataSource[] dataSources) => _dataSources = dataSources;
+
+        public DbAccessor(DataSource[] dataSources, string tenantName)
+        {
+            _dataSources = dataSources;
+            _tenantName = tenantName;
+        }
 
         public DbAccessor(DataSource[] dataSources, Dictionary<string, DbContext> dbContext)
         {
