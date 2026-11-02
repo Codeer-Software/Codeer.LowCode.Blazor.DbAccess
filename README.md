@@ -38,6 +38,14 @@ public class MyDbAccessor : DbAccessor
 }
 ```
 
+`DbAccessor` caches table definitions in a static cache shared by all instances. If one process
+serves several tenants with different databases, pass the tenant name so that each tenant gets its
+own cache (`ClearTableDefinitionCache(tenantName)` clears only that tenant):
+
+```csharp
+IDbAccessor accessor = new DbAccessor(dataSources, tenantKey);
+```
+
 If you prefer not to take a dependency on this package, copy the source from this repository into
 your own project and modify it as needed.
 
