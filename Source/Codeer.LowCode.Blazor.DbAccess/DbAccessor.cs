@@ -312,16 +312,9 @@ namespace Codeer.LowCode.Blazor.DbAccess
             }
             else if (command.MethodType == ExecuteSqlMethodType.Reader)
             {
-                try
-                {
-                    //コマンドを実行するだけで結果は読み捨てる(失敗時は例外)。Reader を開いたままにすると
-                    //同一接続・同一トランザクションの後続コマンドがブロックされるため、スコープ内で確実に閉じる
-                    using var reader = await conn.ExecuteReaderAsync(command.CommandText, ps, transaction, commandTimeout: CommandTimeout, commandType: commandType);
-                }
-                catch (Exception ex)
-                {
-                    throw LowCodeException.Create(ex.Message);
-                }
+                //コマンドを実行するだけで結果は読み捨てる(失敗時は例外)。Reader を開いたままにすると
+                //同一接続・同一トランザクションの後続コマンドがブロックされるため、スコープ内で確実に閉じる
+                using var reader = await conn.ExecuteReaderAsync(command.CommandText, ps, transaction, commandTimeout: CommandTimeout, commandType: commandType);
                 ret = null;
             }
             else

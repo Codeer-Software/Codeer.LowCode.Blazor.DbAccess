@@ -5,7 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Version>0.2.4</Version>
+    <Version>0.2.5</Version>
     <PackageId>Codeer.LowCode.Blazor.DbAccess</PackageId>
     <Title>Codeer.LowCode.Blazor.DbAccess</Title>
     <Company>Codeer</Company>
@@ -15,7 +15,7 @@
     <PackageTags>Blazor;LowCode;Codeer;Database</PackageTags>
     <Description>Multi-database access layer (SQL Server / PostgreSQL / Oracle / SQLite / MySQL) for Codeer.LowCode.Blazor server applications. Provides the standard IDbAccessor implementation (Dapper based, overridable). Note: the Oracle provider (Oracle.ManagedDataAccess.Core) is licensed under the Oracle Free Use Terms and Conditions.</Description>
     <PackageIcon>IconNuget.png</PackageIcon>
-    <PackageReleaseNotes>Added a DbAccessor constructor that takes a tenant name to keep the table definition cache per tenant.</PackageReleaseNotes>
+    <PackageReleaseNotes>Errors from ExecuteSql commands of the Reader type are now propagated as they are, the same as the other command types.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
