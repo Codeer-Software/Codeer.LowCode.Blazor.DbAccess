@@ -1,5 +1,7 @@
 # Codeer.LowCode.Blazor.DbAccess
 
+> **Security notice (2026-11):** Version 0.2.5 fixes an issue in earlier versions. See [GHSA-xc7q-chrv-mc7m](https://github.com/Codeer-Software/Codeer.LowCode.Blazor.Manual/security/advisories/GHSA-xc7q-chrv-mc7m).
+
 Multi-database access layer for [Codeer.LowCode.Blazor](https://github.com/Codeer-Software/Codeer.LowCode.Blazor.Manual) server applications.
 
 Provides the standard `IDbAccessor` implementation (`DbAccessor`) used by the server side of a
